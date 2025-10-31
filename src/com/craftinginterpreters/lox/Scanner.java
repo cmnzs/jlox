@@ -48,10 +48,55 @@ public class Scanner {
             case '!':
                 addToken(match('=') ? BANG_EQUAL : BANG);
                 break;
+            case '=':
+                addToken(match('=') ? EQUAL_EQUAL : EQUAL);
+                break;
+            case '<':
+                addToken(match('=') ? LESS_EQUAL : EQUAL);
+                break;
+            case '>':
+                addToken(match('=') ? GREATER_EQUAL : EQUAL);
+                break;
+            case '/':
+                if (match('/')) {
+                    // a comment goes to the end of the line.
+                    while (peek() != '\n' && !isAtEnd()) advance();
+                } else {
+                    addToken(SLASH);
+                }
+                break;
+            case ' ':
+            case '\r':
+            case '\t':
+                // ignore whitespace
+                break;
+            case '\n':
+                line++;
+                break;
+
+            case '"': string(); break;
+
             default:
                 Lox.error(line, "Unexpected Character");
                 break;
         }
+    }
+
+    private void string() {
+        while (peek() != '"' && !isAtEnd()) {
+            if (peek() == '\n') line++;
+            advance();
+        }
+
+        if (isAtEnd()) {
+            Lox.error(line, "unterminated string!!");
+            return;
+        }
+
+        // the close ".
+        advance();
+        String value = source.substring(start + 1, current - 1);
+        addToken(STRING, value);
     }
 
     private boolean match(char expected) {
@@ -60,6 +105,11 @@ public class Scanner {
 
         current++;
         return true;
+    }
+
+    private char peek() {
+        if (isAtEnd()) return '\0';
+        return source.charAt(current);
     }
 
     private char advance() {

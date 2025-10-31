@@ -169,8 +169,6 @@ public class Scanner {
 
     /**
      * if we match the current character, then advance to the next one
-     * @param expected
-     * @return
      */
     private boolean match(char expected) {
         if (isAtEnd()) return false;

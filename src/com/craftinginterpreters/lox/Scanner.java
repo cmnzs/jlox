@@ -85,7 +85,10 @@ public class Scanner {
                 if (match('/')) {
                     // a comment goes to the end of the line.
                     while (peek() != '\n' && !isAtEnd()) advance();
-                } else {
+                } else if (match('*')) {
+                    docComment();
+                }
+                else {
                     addToken(SLASH);
                 }
                 break;
@@ -104,12 +107,23 @@ public class Scanner {
                 if (isDigit(c)) {
                     number();
                 } else if (isAlpha(c)) {
-                  identifier();
+                    identifier();
                 } else {
                     Lox.error(line, "Unexpected Character");
                 }
                 break;
         }
+    }
+
+    private void docComment() {
+        while (!(peek() == '*' && peekNext() == '/') && !isAtEnd()) {
+            if (peek() == '\n') {
+                line++;
+            }
+            advance();
+        }
+        advance();
+        advance();
     }
 
     private void identifier() {
@@ -147,7 +161,7 @@ public class Scanner {
             return;
         }
 
-        // the close ".
+        // the close "."
         advance();
         String value = source.substring(start + 1, current - 1);
         addToken(STRING, value);
